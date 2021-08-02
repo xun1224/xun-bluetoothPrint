@@ -1,5 +1,7 @@
 # xun-bluetoothPrint
 
+### 可以Q: 525676664 沟通下
+
 可以用于小程序和uniapp app的蓝牙打印通用版本
 
 ```
