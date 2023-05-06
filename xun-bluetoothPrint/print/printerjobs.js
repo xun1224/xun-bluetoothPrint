@@ -56,6 +56,39 @@ printerJobs.prototype.printQrcode = function(content) {
 	return this;
 };
 
+printerJobs.prototype.printQrcodeByESC = function(content) {
+	let arrPrint = [];
+		 
+	let uint8Array = gbk.encode(content);
+	let encoded = Array.from(uint8Array);	
+	
+	//初始化打印机
+	 arrPrint= arrPrint.concat([0x1B, 0x40]); //16进制
+	 //居中对齐
+	 arrPrint=arrPrint.concat([0x1B, 0x61, 0x01]); //16进制
+	 //正文
+		 /*
+				 * QR Code 设置单元大小 【格式】 ASCII GS ( k pL pH 1 C n 十六进制 1D 28 6B 03
+				 * 00 31 43 n 十进制 29 40 107 03 0 49 67 n 功能：设置QR CODE 单元大小。
+				 * 说明：·n 对应QR版本号， 决定QR CODE的高度与宽度。 · 1≤n ≤16。(十六进制为0x01≤n ≤0x0f)
+				 */
+	//设置设置 QR Code 的单元大小为 n 点
+	 arrPrint=arrPrint.concat([0x1d, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x43, 0x05]);
+	//设置错误纠正等级
+	 arrPrint=arrPrint.concat([0x1d, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x45, 0x05]);
+	 //传入数据的长度+3
+	 arrPrint=arrPrint.concat([0x1d, 0x28, 0x6b, encoded.length+3, 0x00, 0x31, 0x50, 0x30]);  
+	 //二维码内容
+	 arrPrint=arrPrint.concat(encoded);
+	 //开始打印二维码
+	 arrPrint=arrPrint.concat([0x1d, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x51, 0x30]);
+	 //恢复居左对齐
+	 arrPrint=arrPrint.concat([0x1B, 0x61, 0x00]); //16进制
+	 this._enqueue(arrPrint);	
+	 this._enqueue(commands.LF);
+	return this;
+};
+
 
 
 /**
